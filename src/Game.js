@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Board from './Board';
 import Status from './Status';
 import ResetButton from './ResetButton';
@@ -8,11 +8,23 @@ const Game = () => {
   const [board, setBoard] = useState(Array(9).fill(null));
   const [isXNext, setIsXNext] = useState(true);
 
+  useEffect(() => {
+    if (!isXNext) {
+      // Computer's turn
+      const randomIndex = getRandomMove(board);
+      makeMove(randomIndex);
+    }
+  }, [isXNext, board]);
+
   const handleClick = (index) => {
-    if (calculateWinner(board) || board[index]) {
+    if (calculateWinner(board) || board[index] || !isXNext) {
       return;
     }
 
+    makeMove(index);
+  };
+
+  const makeMove = (index) => {
     const newBoard = [...board];
     newBoard[index] = isXNext ? 'X' : 'O';
     setBoard(newBoard);
@@ -64,6 +76,18 @@ const calculateWinner = (squares) => {
   }
 
   return null;
+};
+
+// Helper function to get a random available move for the computer player
+const getRandomMove = (board) => {
+  const availableMoves = [];
+  for (let i = 0; i < board.length; i++) {
+    if (board[i] === null) {
+      availableMoves.push(i);
+    }
+  }
+  const randomIndex = Math.floor(Math.random() * availableMoves.length);
+  return availableMoves[randomIndex];
 };
 
 export default Game;
